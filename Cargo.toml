@@ -1,0 +1,38 @@
+[package]
+name = "demo-4AL1"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "client"
+path = "src/client.rs"
+
+[[bin]]
+name = "server"
+path = "src/server.rs"
+
+[[bin]]
+name = "hash_cash"
+path = "src/hash_cash.rs"
+
+[[bin]]
+name = "client_project"
+path = "src/client_project.rs"
+
+[[bin]]
+name = "server_project"
+path = "src/server_project.rs"
+
+[[bin]]
+name = "challenge_hash"
+path = "src/challenge_hash.rs"
+
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+md-5 = "0.10.5"
+serde_json = "1"
+hex_lit = "0.1.1"
+rand = "0.8.5"
