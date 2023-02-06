@@ -14,18 +14,6 @@ name = "server"
 path = "src/server.rs"
 
 [[bin]]
-name = "hash_cash"
-path = "src/hash_cash.rs"
-
-[[bin]]
-name = "client_project"
-path = "src/client_project.rs"
-
-[[bin]]
-name = "server_project"
-path = "src/server_project.rs"
-
-[[bin]]
 name = "challenge_hash"
 path = "src/challenge_hash.rs"
 
