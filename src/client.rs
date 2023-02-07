@@ -5,6 +5,8 @@ use serde_json::Value;
 
 mod message;
 use message::Message;
+use crate::message::Challenge::MD5HashCash;
+use crate::message::ChallengeInput;
 
 fn main() {
     let mut stream = TcpStream::connect("127.0.0.1:7878").unwrap();
@@ -49,6 +51,12 @@ fn main() {
                 stream.write_all(&subscribe_len_buf).unwrap();
                 stream.write_all(subscribe_json.as_bytes()).unwrap();
             },
+            Message::Challenge(MD5HashCash(ChallengeInput {
+                complexity: u8,
+                message: String,
+                }))=>{
+                println!("challenge recu");
+            }
             _ => {}
         }
     }

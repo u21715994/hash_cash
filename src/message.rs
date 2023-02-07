@@ -6,7 +6,7 @@ enum Result {
     Err(SubscribeError)
 }
 #[derive(Debug, Deserialize, Serialize)]
-enum Challenge {
+pub enum Challenge {
     MD5HashCash(ChallengeInput)
 }
 
@@ -56,9 +56,9 @@ enum ChallengeName {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct ChallengeInput {
-    complexity: u8,
-    message: String,
+pub struct ChallengeInput {
+    pub complexity: u8,
+    pub message: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
