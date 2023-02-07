@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 enum Result {
-    Ok,
+    Ok(String),
     Err(SubscribeError)
 }
 #[derive(Debug, Deserialize, Serialize)]

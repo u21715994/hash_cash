@@ -1,7 +1,10 @@
 use std::io::prelude::*;
 use std::net::TcpStream;
 use md5::Digest;
+use serde_json::Value;
 
+mod message;
+use message::Message;
 
 fn main() {
     let mut stream = TcpStream::connect("127.0.0.1:7878").unwrap();
@@ -12,15 +15,41 @@ fn main() {
     stream.write(&len.to_be_bytes()).unwrap(); // on écrit le préfixe (taille du prochain message)
     stream.write(message.as_bytes()).unwrap(); // puis le message en tant que tel
 
-    let mut buf_len = [0u8; 4];
-    stream.read_exact(buf_len.as_mut()).unwrap(); // lit exactement la taille du buffer
+    let mut stream = TcpStream::connect("127.0.0.1:7878").unwrap();
 
-    let len = u32::from_le_bytes(buf_len); // convertit les 4 octets en un entier u32
+// Envoyer le message Hello au serveur
 
-    let mut buf = vec![0u8; len as usize]; // on prépare un buffer pour ce qui va arriver
-    stream.read(buf.as_mut()).unwrap(); // on remplit le buffer
-    // c'est arrivé
-    println!("{buf:?}"); // en octets
-    let s = String::from_utf8_lossy(&buf);
-    println!("{:}", s)
+    loop {
+        let hello_message = Message::Hello;
+        let hello_json = serde_json::to_string(&hello_message).unwrap();
+        let hello_len = hello_json.len() as u32;
+        let hello_len_buf = hello_len.to_be_bytes();
+        stream.write_all(&hello_len_buf).unwrap();
+        stream.write_all(hello_json.as_bytes()).unwrap();
+
+        let mut len_buf = [0u8; 4];
+        let _ = stream.read_exact(&mut len_buf).unwrap();
+        let len = u32::from_be_bytes(len_buf);
+
+        let mut message_buf = vec![0u8; len as usize];
+        let _ = stream.read_exact(&mut message_buf).unwrap();
+
+        let json_value: Value = serde_json::from_slice(&message_buf).unwrap();
+        let message: Message = serde_json::from_value(json_value).unwrap();
+
+        match message {
+            Message::Welcome { version } => {
+                // handle "Welcome" message with version field
+
+                // Envoyer le message Subscribe au serveur
+                let subscribe_message = Message::Subscribe {name: "r".to_string()};
+                let subscribe_json = serde_json::to_string(&subscribe_message).unwrap();
+                let subscribe_len = subscribe_json.len() as u32;
+                let subscribe_len_buf = subscribe_len.to_be_bytes();
+                stream.write_all(&subscribe_len_buf).unwrap();
+                stream.write_all(subscribe_json.as_bytes()).unwrap();
+            },
+            _ => {}
+        }
+    }
 }
