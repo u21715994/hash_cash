@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::io::prelude::*;
 use std::net::TcpStream;
 use md5::Digest;
@@ -7,6 +8,11 @@ mod message;
 use message::Message;
 use crate::message::Challenge::MD5HashCash;
 use crate::message::ChallengeInput;
+mod challenge_hash;
+//use challenge_hash::MD5HashCashInput;
+//use crate::challenge_hash::MD5HashCashChallenge;
+//use HashCashMod::{verify, new, solve, MD5HashCashChallenge, MD5HashCashInput};
+use crate::challenge_hash::HashCashMod::{MD5HashCashChallenge, MD5HashCashInput};
 
 fn main() {
     let mut stream = TcpStream::connect("127.0.0.1:7878").unwrap();
@@ -37,8 +43,14 @@ fn main() {
         let _ = stream.read_exact(&mut message_buf).unwrap();
 
         let json_value: Value = serde_json::from_slice(&message_buf).unwrap();
+        println!("{:?}", json_value);
+        /*let mut message: Message;
+        if json_value == Message::SubscribeResult{
+            json_value.Ok != ""
+        }else{
+            message: Message = serde_json::from_value(json_value).unwrap();
+        }*/
         let message: Message = serde_json::from_value(json_value).unwrap();
-
         match message {
             Message::Welcome { version } => {
                 // handle "Welcome" message with version field
@@ -52,10 +64,14 @@ fn main() {
                 stream.write_all(subscribe_json.as_bytes()).unwrap();
             },
             Message::Challenge(MD5HashCash(ChallengeInput {
-                complexity: u8,
-                message: String,
-                }))=>{
+               complexity,
+               message,
+           }))=>{
                 println!("challenge recu");
+                let input: MD5HashCashInput = message.parse().unwrap();
+                let challenge = MD5HashCashChallenge::new(input);
+                let output = challenge.solve();
+                println!("{:?}", output);
             }
             _ => {}
         }
