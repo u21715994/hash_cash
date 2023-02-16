@@ -30,7 +30,7 @@ pub enum Message {
         chain: Vec<ReportedChallengeResult>,
     },
     EndOfGame {
-        leader_board: PublicLeaderBoard,
+        leader_board: Vec<PublicPlayer>,
     }
 }
 
@@ -40,11 +40,11 @@ enum SubscribeError {
     InvalidName
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-struct PublicPlayer {
-    name: String,
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct PublicPlayer {
+    pub name: String,
     stream_id: String,
-    score: u32,
+    pub score: i32,
     steps: u32,
     is_active: bool,
     total_used_time: f64,
@@ -62,13 +62,13 @@ pub struct ChallengeInput {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct ChallengeOutput {
-    seed: u64,
-    hashcode: String,
+pub struct ChallengeOutput {
+    pub seed: u64,
+    pub hashcode: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-enum ChallengeAnswer {
+pub enum ChallengeAnswer {
     MD5HashCash(ChallengeOutput)
 }
 
@@ -87,12 +87,7 @@ enum ChallengeValue{
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct ReportedChallengeResult {
+pub struct ReportedChallengeResult {
     name: String,
     value: ChallengeValue,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct PublicLeaderBoard{
-    publicLeaderBoard: Vec<PublicPlayer>
 }
