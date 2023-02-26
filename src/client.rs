@@ -80,11 +80,16 @@ fn main() {
                     }
                 }
             },
+            Message::ChallengeTimeout { message }=>{
+                println!("Vous avez ete vire");
+                break;
+            }
             Message::Challenge(MD5HashCash(ChallengeInput{ complexity , message }))=>{
                 let input: MD5HashCashInput = MD5HashCashInput{
                     complexity: u32::from(complexity),
                     message
                 };
+                //println!("entree {:?}", input);
                 let challenge = MD5HashCashChallenge::new(input);
                 let output = challenge.solve();
                 //println!("{:?}", output);
@@ -108,7 +113,7 @@ fn main() {
                 //println!("Résume du round {:?}", chain);
             },
             Message::EndOfGame {leader_board}=>{
-                //println!("Fin de la partie");
+                println!("Fin de la partie");
                 break;
             }
             _ => {}

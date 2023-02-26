@@ -118,13 +118,20 @@ fn verify_bit_zero(number: u32, binary: String) -> bool {
 fn solve_md5_hash_cash(input: MD5HashCashInput) -> MD5HashCashOutput {
 // Map qui stocke les résultats déjà calculés pour éviter de refaire les calculs
     let mut cache: HashMap<MD5HashCashInput, MD5HashCashOutput> = HashMap::new();
+    let mut output: MD5HashCashOutput = MD5HashCashOutput{seed: 1, hashcode: "".to_string()};
 
 // Génère une valeur de graine aléatoire
-    let mut seed: u64 = rand::random();
+    let mut seed: u64 = 0;
 
 // Tant qu'on n'a pas trouvé une valeur de graine qui résout le challenge
-    while !cache.contains_key(&input) {
-        let mut seed_binary: String = format!("{:X}", seed);
+    loop {
+        let mut seed_binary = format!("{:X}", seed);
+        if seed_binary.len() < 16{
+            let zero_to_add = 16-seed_binary.len();
+            for i in 0..zero_to_add{
+                seed_binary = "0".to_string() + &seed_binary;
+            }
+        }
         /*for i in seed.to_le_bytes(){
         seed_binary = seed_binary + &*i.to_string();
     }*/
@@ -147,16 +154,22 @@ fn solve_md5_hash_cash(input: MD5HashCashInput) -> MD5HashCashOutput {
         // Vérifie si le hashcode comprend au moins "complexity" bits égaux à 0
         if verify_bit_zero(input.complexity, hashcode_bin) {
             //Stocke le résultat dans la map pour éviter de refaire les calculs
-            println!("{}", seed_binary);
-            cache.insert(input.clone(), MD5HashCashOutput { seed, hashcode: hashcode_clone });
+            //println!("{}", seed_binary);
+            let seed_binary_64 = u64::from_str_radix(&seed_binary, 16).unwrap();
+            output.seed = seed_binary_64;
+            output.hashcode = hashcode_clone;
+            //println!("{}", seed_binary_64);
+            //cache.insert(input.clone(), MD5HashCashOutput { seed: seed_binary_64, hashcode: hashcode_clone });
+            break;
         }
 
         // Génère une nouvelle valeur de graine aléatoire
-        seed = rand::random();
+        seed = seed+1;
     }
 
 // Retourne le résultat du challenge
-    cache[&input].clone()
+    println!("{:?}", output);
+    output
 }
 
 // Implémentation du trait Challenge pour la structure MD5HashCash
@@ -193,63 +206,6 @@ impl Challenge for MD5HashCashChallenge {
         self.md5HashCashOuput == *output
     }
 }
-
-fn main() {
-    /*println!("{:?}", message::Message::ChallengeTimeout {message: "coucou ceci est un tesr".to_string()});
-let data = r#"
-    {"EndOfGame":{"leader_board":{"publicLeaderBoard":[{"name":"free_patato","stream_id":"127.0.0.1","score":10,"steps":20,"is_active":true,"total_used_time":1.234},{"name":"dark_salad","stream_id":"127.0.0.1","score":6,"steps":200,"is_active":true,"total_used_time":0.1234}]}}}"#;
-println!("json {}", message_to_json(message::Message::ChallengeTimeout {message: "coucou ceci est un tesr".to_string()}));
-
-// Parse the string of data into serde_json::Value.
-//let v: Value = json_to_message(data.to_string());
-//let m = message::Message::Welcome {version: v["Welcome"]["version"].as_u64().unwrap() as u8};
-let message = json_to_message(data.to_string());
-// Access parts of the data by indexing with square brackets.
-//println!("struct rust {:?}", m);
- println!("struct rust {:?}", message);*/
-
-
-    /*let data = r#"{
-"Welcome":{
-    "version":1
-    }
-}"#;
-let srcMsg = Message::Welcome.version = 2;*/
-    //let v: Value = serde_json::from_str(data).unwrap();
-    //let message_to_json = serde(srcMsg);
-
-    //println!("{}", message_to_json);
-    // Parse les données en entrée du challenge
-    let input: MD5HashCashInput = "9 hello".parse().unwrap();
-
-// Crée un nouveau challenge
-let challenge = MD5HashCashChallenge::new(input);
-
-// Résout le challenge
-let output = challenge.solve();
-
-// Vérifie si la sortie est valide pour le challenge
-let result = challenge.verify(&output.clone());
-let output_clone = output.clone();
-// Affiche le résultat
-println!("Result = {}", result);
-println!("Resultat hashcode = {}", output.clone().hashcode);
-let mut seed_binary="".to_string();
-for i in output_clone.seed.to_le_bytes(){
-  seed_binary = seed_binary.to_string() + &i.to_string();
-}
-println!("Resultat seed = {}", seed_binary);
-let input = MD5HashCashInput{complexity: 9, message: String::from("hello")};
-let output = solve_md5_hash_cash(input);
-println!("Resultat hashcode = {}", output.hashcode);
-/*let mut seed_binary="".to_string();
-for i in output.seed.to_le_bytes(){
-    seed_binary = seed_binary.to_string() + &i.to_string();
-}*/
-println!("Resultat seed = {}", output.seed);
-    //println!("Bit code = {}", format!("{:b}", output.seed))
-}
-
 
     /*
  * INFO COMPLÉMENTAIRE
